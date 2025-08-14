@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name         大东家兑换助手
+// @name         兑换助手
 // @namespace    http://tampermonkey.net/
 // @version      2.0.0.5
 // @description  简陋的兑换助手，废弃了第一版的多数方法，对页面本身的元素操作减少
@@ -35,7 +35,7 @@
     `);
     //console.log("Hello DDJ");
     const myHeaders = {"Content-Type": "application/json"};
-    const baseInterval = 8, maxJitter = 60000; //默认是要间隔8分钟左右向大东家服务器请求一下库存，页面内可以自行调整
+    const baseInterval = 8, maxJitter = 60000; //默认是要间隔8分钟左右向服务器请求一下库存，页面内可以自行调整
     //const baseUrl = "http://example.com/"; //这个网址是自己的涉及需要推送提醒的接口
     const ddjUrl = "https://activity-gateway.23you.net/";
     const storage_key = "storage"; //使用GM_getValue来存储库存记录的键值
@@ -317,7 +317,7 @@
         user_timer = setTimeout(function(){postData(url, data, getRealItem, true);}, nextInterval);
     }
     /***
-    这是向大东家服务器发送post数据的通用方法，因为headers基本上都是需要这些的
+    这是向服务器发送post数据的通用方法，因为headers基本上都是需要这些的
     区别就是第一个参数是请求地址，第二个参数是携带的json格式数据
     第三个参数是回调函数，默认没有
     第四个参数是是否重复执行，默认不重复
@@ -353,7 +353,7 @@
             }
         });
     }
-    //这个方法把从大东家服务器获取到的冗余数据，精简为自己需要的库存信息。最重要的是，如果有库存可以在这里设置提醒。
+    //这个方法把从服务器获取到的冗余数据，精简为自己需要的库存信息。最重要的是，如果有库存可以在这里设置提醒。
     function getRealItem(obj){
         const month = obj.data[1];
         let items = [];
@@ -419,7 +419,7 @@
         });
     }
     //这是最终的提交函数，需要传入商品ID，地址从userinfo存储中读取，所以要事先设置。
-    //这个提交订单没有二次确认，点击后就会直接发送给大东家服务器，如果有库存，理论上来说就能直接完成兑换。
+    //这个提交订单没有二次确认，点击后就会直接发送给服务器，如果有库存，理论上来说就能直接完成兑换。
     function confirmOrder(id){
         const url = ddjUrl + "api/act/process/exchange-point-reward";
         const user_info = GM_getValue(userinfo_key);
