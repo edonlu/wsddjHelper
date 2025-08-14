@@ -2,7 +2,7 @@
 // @name         兑换助手
 // @namespace    http://tampermonkey.net/
 // @version      1.0.0.3
-// @description  简陋的兑换助手，由于对页面元素过于依赖，所以已经废弃
+// @description  简陋的兑换助手，由于对页面元素过于依赖，所以已经弃用
 // @author       唐僧肉片
 // @match        https://wsddj.quxianghudong.com/act/*
 // @icon         https://cdn-game-forum-wsddj.quxianghudong.com/public/favicon_6d33aace3f3d61c944d16b33f6d1ee37.png
