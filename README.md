@@ -118,6 +118,8 @@
 
 ![截图3](https://github.com/edonlu/wsddjHelper/blob/main/screenshot2.png?raw=true)
 
+![通知截图](https://github.com/edonlu/wsddjHelper/blob/main/screenshot4.png?raw=true)
+
 ## 其他说明
 
 - 程序不对填写的地址做验证，所以自行检查填写的信息是否有误。
