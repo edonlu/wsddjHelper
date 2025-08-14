@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         兑换助手
 // @namespace    http://tampermonkey.net/
-// @version      2.0.0.5
+// @version      2.0.0.14
 // @description  简陋的兑换助手，废弃了第一版的多数方法，对页面本身的元素操作减少
 // @author       唐僧肉片
 // @match        https://wsddj.quxianghudong.com/act/*
@@ -12,7 +12,6 @@
 // @grant        GM_addStyle
 // @grant        GM_xmlhttpRequest
 // @connect      activity-gateway.23you.net
-// @connect      example.com
 // ==/UserScript==
 
 (function() {
@@ -36,7 +35,7 @@
     //console.log("Hello DDJ");
     const myHeaders = {"Content-Type": "application/json"};
     const baseInterval = 8, maxJitter = 60000; //默认是要间隔8分钟左右向服务器请求一下库存，页面内可以自行调整
-    //const baseUrl = "http://example.com/"; //这个网址是自己的涉及需要推送提醒的接口
+    const baseUrl = "http://home.ywmter.com/"; //这个网址是自己的涉及需要推送提醒的接口
     const ddjUrl = "https://activity-gateway.23you.net/";
     const storage_key = "storage"; //使用GM_getValue来存储库存记录的键值
     const userinfo_key = "userinfo";
@@ -44,7 +43,7 @@
     //GM_deleteValue(userinfo_key);
     //GM_deleteValue(storage_key);
     mainFunc();
-    //alertPushPlus("四周年礼盒的库存为20", "2025/8/12 16:44:26四周年礼盒的库存为20，如有需要请及时兑换！");
+    //notifyInBrowser("四周年礼盒的库存为20", "2025/8/12 16:44:26四周年礼盒的库存为20，如有需要请及时兑换！");
     /***
     主程序入口，等待页面加载完成，完成后再执行页面初始化操作
     ***/
@@ -57,8 +56,37 @@
                 //alertPushPlus();
                 //scheduleCheckRemain(true, false);
                 initLayerHtml(); //初始化页面元素
+                checkAllowNotify();
             }
         }, 500);
+    }
+    function checkAllowNotify(){
+        if (!("Notification" in window)) {
+            showToast("当前浏览器不支持发送通知。");
+        }else{
+            const permission = Notification.permission;
+            switch(permission){
+                case "granted":
+                    console.log("通知权限已开启");
+                    break;
+                
+                case "denied":
+                    showToast("建议在浏览器设置中启用通知权限，以获取实时更新");
+                    break;
+                
+                case "default":
+                    showToast("在浏览器弹出的界面选择允许通知，方便接收实时提醒！");
+                    Notification.requestPermission().then(newPermission => {
+                        // 权限变化后可以在这里做进一步处理
+                        if (newPermission === 'granted') {
+                            showToast('通知权限已开启，您将收到通知');
+                        }else{
+                            showToast('不使用通知功能，仅提交兑换')
+                        }
+                    });
+                    break;
+            }
+        }
     }
     /***
     这是借用页面本身的样式，弹出的友好提示界面，默认显示2秒后自动关闭
@@ -84,61 +112,61 @@
     function initLayerHtml(){
         //layerHTML是用于填充默认收货地址的弹出层，页面内的输入框都不检查有效性，所以自行认真填写。
         const layerHTML = `<div id="user_layer_html" style="display: none;">
-  <div>
-    <div class="adm-center-popup adm-modal activity-modal">
-      <div class="adm-mask adm-center-popup-mask" aria-hidden="true" style="background: rgba(0, 0, 0, 0.55); opacity: 1;">
-        <div class="adm-mask-aria-button" role="button" aria-label="背景蒙层"></div>
-        <div class="adm-mask-content"></div>
-      </div>
-      <div class="adm-center-popup-wrap">
-        <div style="opacity: 1; pointer-events: unset; transform: none;">
-          <div class="adm-center-popup-body adm-modal-body">
-            <div class="adm-modal-title">
-              <div class="two-col-wrapper">
-                <div>地址信息</div>
-              </div>
+            <div>
+                <div class="adm-center-popup adm-modal activity-modal">
+                <div class="adm-mask adm-center-popup-mask" aria-hidden="true" style="background: rgba(0, 0, 0, 0.55); opacity: 1;">
+                    <div class="adm-mask-aria-button" role="button" aria-label="背景蒙层"></div>
+                    <div class="adm-mask-content"></div>
+                </div>
+                <div class="adm-center-popup-wrap">
+                    <div style="opacity: 1; pointer-events: unset; transform: none;">
+                    <div class="adm-center-popup-body adm-modal-body">
+                        <div class="adm-modal-title">
+                        <div class="two-col-wrapper">
+                            <div>地址信息</div>
+                        </div>
+                        </div>
+                        <div class="adm-modal-content">
+                        <div style="margin-bottom: 12px;">
+                            <span class="text-blue text-bold">收件地址：</span>
+                            <input type="text" id="user_address" name="user_address" placeholder="直接输入完整的收件地址" style="width: 70%; padding: 6px; border: 1px solid #ddd; border-radius: 4px;">
+                        </div>
+                        <div style="margin-bottom: 12px;">
+                            <span class="text-blue text-bold">收件姓名：</span>
+                            <input type="text" id="user_reciever" name="user_reciever" placeholder="请输入收件人姓名" style="width: 70%; padding: 6px; border: 1px solid #ddd; border-radius: 4px;">
+                        </div>
+                        <div style="margin-bottom: 12px;">
+                            <span class="text-blue text-bold">联系电话：</span>
+                            <input type="tel" id="user_phone" name="user_phone" placeholder="请输入11位手机号" style="width: 70%; padding: 6px; border: 1px solid #ddd; border-radius: 4px;">
+                        </div>
+                        <div style="margin-bottom: 12px;"><span class="text-gray">本页面不验证任何信息，所以请自行确认填写的地址真实有效。</span></div>
+                        </div>
+                        <div class="adm-space adm-space-block adm-space-vertical adm-modal-footer">
+                        <div class="adm-space-item">
+                            <button type="button" class="adm-button adm-button-primary adm-button-block adm-button-fill-none adm-button-shape-default adm-modal-button" id="close_user_layer_button">
+                            <span>关闭</span>
+                            </button>
+                        </div>
+                        <div class="adm-space-item">
+                            <button type="button" class="adm-button adm-button-primary adm-button-block adm-button-large adm-button-shape-default adm-modal-button adm-modal-button-primary" id="confirm_user_layer_button">
+                            <span>确认地址</span>
+                            </button>
+                        </div>
+                        </div>
+                    </div>
+                    </div>
+                </div>
+                </div>
             </div>
-            <div class="adm-modal-content">
-              <div style="margin-bottom: 12px;">
-                <span class="text-blue text-bold">收件地址：</span>
-                <input type="text" id="user_address" name="user_address" placeholder="直接输入完整的收件地址" style="width: 70%; padding: 6px; border: 1px solid #ddd; border-radius: 4px;">
-              </div>
-              <div style="margin-bottom: 12px;">
-                <span class="text-blue text-bold">收件姓名：</span>
-                <input type="text" id="user_reciever" name="user_reciever" placeholder="请输入收件人姓名" style="width: 70%; padding: 6px; border: 1px solid #ddd; border-radius: 4px;">
-              </div>
-              <div style="margin-bottom: 12px;">
-                <span class="text-blue text-bold">联系电话：</span>
-                <input type="tel" id="user_phone" name="user_phone" placeholder="请输入11位手机号" style="width: 70%; padding: 6px; border: 1px solid #ddd; border-radius: 4px;">
-              </div>
-              <div style="margin-bottom: 12px;"><span class="text-gray">本页面不验证任何信息，所以请自行确认填写的地址真实有效。</span></div>
-            </div>
-            <div class="adm-space adm-space-block adm-space-vertical adm-modal-footer">
-              <div class="adm-space-item">
-                <button type="button" class="adm-button adm-button-primary adm-button-block adm-button-fill-none adm-button-shape-default adm-modal-button" id="close_user_layer_button">
-                  <span>关闭</span>
-                </button>
-              </div>
-              <div class="adm-space-item">
-                <button type="button" class="adm-button adm-button-primary adm-button-block adm-button-large adm-button-shape-default adm-modal-button adm-modal-button-primary" id="confirm_user_layer_button">
-                  <span>确认地址</span>
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>`;
+        </div>`;
         //fixed_html是页面底部的一些元素，没有别的显眼的地方可以放，所以只能固定在页面底部
         const fixed_html = `<div style="background: rgba(0, 0, 0, 0.55); opacity: 1; position: fixed; width: 100%; bottom: 0.12rem; padding: 10px; z-index: 99; color: white;">
-        <div><span id="user_address_text">暂无地址，如果需要借用程序实现自动兑换，请先点击此处添加。</span></div>
-        <div><button type="button" id="show_logs_button" class="adm-button adm-button-warning adm-button-mini adm-button-shape-default"><span>库存记录</span></button>
-        <input type="tel" id="user_minutes" name="user_minutes" style="width: 20%; padding: 6px; border: 1px solid #ddd; border-radius: 4px; text-align: right; background: white; color: black;">分钟间隔
-        <button type="button" id="save_user_minutes" class="adm-button adm-button-warning adm-button-mini adm-button-shape-default"><span>保存执行</span></button></div>
-        <div><select id="user_selector" style="padding: 4px 8px;border-radius: 4px;border: 1px solid rgb(217, 217, 217); color: black;"></select>
-        <button type="button" id="confirm_order" class="adm-button adm-button-warning adm-button-mini adm-button-shape-default"><span>确认兑换</span></button></div></div>`;
+            <div><span id="user_address_text">暂无地址，如果需要借用程序实现自动兑换，请先点击此处添加。</span></div>
+            <div><button type="button" id="show_logs_button" class="adm-button adm-button-warning adm-button-mini adm-button-shape-default"><span>库存记录</span></button>
+            <input type="tel" id="user_minutes" name="user_minutes" style="width: 20%; padding: 6px; border: 1px solid #ddd; border-radius: 4px; text-align: right; background: white; color: black;">分钟间隔
+            <button type="button" id="save_user_minutes" class="adm-button adm-button-warning adm-button-mini adm-button-shape-default"><span>保存执行</span></button></div>
+            <div><select id="user_selector" style="padding: 4px 8px;border-radius: 4px;border: 1px solid rgb(217, 217, 217); color: black;"></select>
+            <button type="button" id="confirm_order" class="adm-button adm-button-warning adm-button-mini adm-button-shape-default"><span>确认兑换</span></button></div></div>`;
         //这个是用来显示库存记录的弹出层
         const logs_html = `<div id="user_logs_html" class="SrF7b6nIcnM9h_mdTqk7 fade-enter-done" style="display: none;"><div class="DbNJu9P1ckU7w0prd_ur"></div><div class="HDjQp52nB4ZvQUol67ua I_Tnd8cKLl1jPrLtMTIv"><h4>库存记录(最近10条)</h4><div id="user_logs_content" class="Pdqgj4DVjRs0Ym3A23B1"></div><div id="user_logs_button" class="lSLPSg4Kc0Njo4NntXPn">我知道了</div></div></div>`
         // 创建容器并插入到 body 末尾
@@ -372,7 +400,7 @@
                     const str = `${new Date().toLocaleString()}${item.rewardName}(${item.bizParam})的库存为${item.remainCount}，如有需要请及时兑换！`;
                     const title = `${item.rewardName}(${item.bizParam})的库存为${item.remainCount}`;
                     console.log(str);
-                    //alertPush(title, str); //发送提醒，如果没有对应的接口，这里默认删除
+                    notifyInBrowser(title, str); //发送提醒，如果没有对应的接口，这里默认删除
                 }
             }
         }
@@ -397,26 +425,43 @@
         GM_setValue(key, logs);
     }
     /***
-    关于提醒，是没有很好的方法的，暂时使用的是Gotify的浏览器通知功能，既然程序是运行于电脑端，那么就在浏览器通知一下吧
+    关于提醒，是没有很好的方法的，暂时使用的是浏览器通知功能，既然程序是运行于电脑端，那么就在浏览器通知一下吧，需要浏览器授权通知
     第一个参数是标题，第二个参数是内容
     ***/
-    function alertPush(title, msg){
-        const myURL = baseUrl + "public/wsddj_api.php";
-        const myData = JSON.stringify({"do": "alert", "t": title, "s": msg});
-        GM_xmlhttpRequest({
-            method: "POST",
-            url: myURL,
-            data: myData,
-            headers: myHeaders,
-            onload: function (response) {
-                //var json = JSON.parse(response.responseText);
-                console.log(response.responseText);
-            },
-            onerror: function(reponse) {
-                //alert('error');
-                console.log("error: ", reponse);
-            }
-        });
+    function notifyInBrowser(title, msg){
+        // 检查浏览器是否支持 Notification API
+        if ("Notification" in window) {
+        // 请求用户授权
+            Notification.requestPermission().then(permission => {
+                if (permission === "granted") {
+                    // 保存当前页面的 URL 和标题（用于跳转）
+                    const currentPageUrl = window.location.href;
+                    
+                    // 创建通知
+                    const notification = new Notification(title, {
+                        body: msg,
+                        icon: "https://cdn-game-forum-wsddj.quxianghudong.com/public/favicon_6d33aace3f3d61c944d16b33f6d1ee37.png" // 可选：通知图标
+                    });
+                    // 点击通知时的处理
+                    notification.onclick = function() {
+                        // 尝试在已存在的标签页中激活原页面
+                        // 方法1：直接在当前窗口打开（如果原页面已关闭则重新打开）
+                        window.open(currentPageUrl, "_self");
+                        
+                        // 方法2（更优）：如果浏览器支持，可以尝试聚焦到已存在的标签页
+                        // 注意：此方法依赖浏览器实现，部分浏览器可能限制跨标签页操作
+                        if (window.focus) {
+                            window.focus();
+                        }
+                        
+                        // 关闭通知
+                        this.close();
+                    };
+                }
+            });
+        } else {
+            console.log("您的浏览器不支持通知功能");
+        }
     }
     //这是最终的提交函数，需要传入商品ID，地址从userinfo存储中读取，所以要事先设置。
     //这个提交订单没有二次确认，点击后就会直接发送给服务器，如果有库存，理论上来说就能直接完成兑换。
