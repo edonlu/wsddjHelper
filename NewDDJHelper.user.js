@@ -35,7 +35,6 @@
     //console.log("Hello DDJ");
     const myHeaders = {"Content-Type": "application/json"};
     const baseInterval = 8, maxJitter = 60000; //默认是要间隔8分钟左右向服务器请求一下库存，页面内可以自行调整
-    const baseUrl = "http://home.ywmter.com/"; //这个网址是自己的涉及需要推送提醒的接口
     const ddjUrl = "https://activity-gateway.23you.net/";
     const storage_key = "storage"; //使用GM_getValue来存储库存记录的键值
     const userinfo_key = "userinfo";
