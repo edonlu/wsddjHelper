@@ -110,6 +110,12 @@
 ```
 关于这个记录的格式说明，其实是跟上面那个是一样的。每次请求后，程序把最新的记录中，有库存的商品信息提取出来，存入userinfo中，方便填充页面的下拉选择框。
 
+## 程序截图
+
+![截图1](https://github.com/edonlu/wsddjHelper/blob/main/screenshot1.png?raw=true)
+![截图2](https://github.com/edonlu/wsddjHelper/blob/main/screenshot2.png?raw=true)
+![截图3](https://github.com/edonlu/wsddjHelper/blob/main/screenshot3.png?raw=true)
+
 ## 其他说明
 
 - 程序不对填写的地址做验证，所以自行检查填写的信息是否有误。
