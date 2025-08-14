@@ -304,7 +304,7 @@
         }
         const jitter = (Math.random() * 2 - 1) * maxJitter;
         const user_info = GM_getValue(userinfo_key, {});
-        let userInterval = 8;
+        let userInterval = baseInterval;
         if(!isNaN(user_info.time)) userInterval = user_info.time;
         const nextInterval = Math.abs(userInterval * 60 * 1000 + jitter);
         const nextMin = nextInterval/60/1000;
