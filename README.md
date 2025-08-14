@@ -113,8 +113,10 @@
 ## 程序截图
 
 ![截图1](https://github.com/edonlu/wsddjHelper/blob/main/screenshot1.png?raw=true)
-![截图2](https://github.com/edonlu/wsddjHelper/blob/main/screenshot2.png?raw=true)
-![截图3](https://github.com/edonlu/wsddjHelper/blob/main/screenshot3.png?raw=true)
+
+![截图2](https://github.com/edonlu/wsddjHelper/blob/main/screenshot3.png?raw=true)
+
+![截图3](https://github.com/edonlu/wsddjHelper/blob/main/screenshot2.png?raw=true)
 
 ## 其他说明
 
